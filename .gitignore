@@ -1,0 +1,14 @@
+node_modules/
+dist/
+packages/*/dist/
+.next/
+.env.local
+/inpage-provider-legacy/
+.idea/
+yarn-error.log
+.DS_Store
+.watchman-*
+package.json.lerna_backup
+lerna-debug.log
+.env
+.vscode

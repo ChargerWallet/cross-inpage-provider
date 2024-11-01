@@ -1,0 +1,63 @@
+name: publish-npm-packages
+
+on: workflow_dispatch
+
+jobs:
+  publish-packages:
+    runs-on: ubuntu-latest
+    env:
+      TEST_ENDPOINT: dapp-example.chargerwallettest.com
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          registry-url: 'https://registry.npmjs.org'
+          cache: 'yarn'
+
+      - name: Install Packages
+        # global env make ci `yarn && yarn bootstrap` not correctly
+
+        # fix src/classes.ts(2,27): error TS2307: Cannot find module 'fast-safe-stringify'
+        # exec `yarn bootstrap` twice
+        run: |
+          yarn
+          yarn bootstrap
+          yarn bootstrap
+          NODE_ENV=production yarn build
+          yarn test
+          yarn lint
+
+      - name: Publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        # TODO check published packages injected is minified
+        run: |
+          git reset --hard
+          NODE_ENV=production yarn publish-packages -y --no-verify-access
+
+      - name: Sleep for 90 seconds
+        uses: jakejarvis/wait-action@master
+        with:
+          time: '90s'
+
+      - name: Write Example .env
+        run: |
+          # Next.js environment variables
+          echo "NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID=${{ secrets.WALLET_CONNECT_PROJECT_ID }}" > ./packages/example/.env
+          echo "NEXT_PUBLIC_BLOCKFROST_CARDANO_PROJECT_ID=${{ secrets.BLOCKFROST_CARDANO_PROJECT_ID }}" >> ./packages/example/.env
+
+      - name: Build Example Web
+        run: |
+          yarn clean-workspace
+          yarn example-build
+          cp ./packages/example/out/index.html ./packages/example/out/404.html
+
+      - name: Deploy Github Pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./packages/example/out
+          cname: ${{ env.TEST_ENDPOINT }}
+          force_orphan: true

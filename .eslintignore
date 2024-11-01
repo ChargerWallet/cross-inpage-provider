@@ -1,0 +1,7 @@
+node_modules
+dist
+*.js
+*.spec.ts
+inpage-provider-legacy/
+**/__tests__/*
+playwright.config.ts

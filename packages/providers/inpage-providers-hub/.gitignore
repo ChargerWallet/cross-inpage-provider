@@ -1,0 +1,13 @@
+dist/
+node_modules/
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+/tests/screenshots/
+/tests/reports/
+*/**/*.log
+*/**/screenshots/
+
+*/**/reports/
+reports/

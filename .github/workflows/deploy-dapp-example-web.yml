@@ -1,0 +1,46 @@
+name: deploy-dapp-example-web
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main,master]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    env:
+      TEST_ENDPOINT: dapp-example.chargerwallettest.com
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Environment
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          registry-url: 'https://registry.npmjs.org'
+          cache: 'yarn'
+
+      - name: Write Example .env
+        run: |
+          # Next.js environment variables
+          echo "NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID=${{ secrets.WALLET_CONNECT_PROJECT_ID }}" > ./packages/example/.env
+          echo "NEXT_PUBLIC_BLOCKFROST_CARDANO_PROJECT_ID=${{ secrets.BLOCKFROST_CARDANO_PROJECT_ID }}" >> ./packages/example/.env
+
+      - name: Install Dependency
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo 'skipped yarn install at workspace root'
+
+      - name: Build Target
+        run: |
+          yarn example-build
+          cp ./packages/example/out/index.html ./packages/example/out/404.html
+
+      - name: Deploy Github Pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./packages/example/out
+          cname: ${{ env.TEST_ENDPOINT }}
+          force_orphan: true

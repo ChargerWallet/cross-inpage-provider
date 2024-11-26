@@ -1,0 +1,23 @@
+{
+  "name": "@chargerwallet/cross-inpage-provider-events",
+  "version": "4.0.0",
+  "keywords": [
+    "cross-inpage-provider-events"
+  ],
+  "author": "dev@chargerwallet.com",
+  "repository": "https://github.com/chargerwallet/cross-inpage-provider",
+  "license": "Apache-2.0",
+  "publishConfig": {
+    "access": "public"
+  },
+  "files": [
+    "dist/*",
+    "cross-events.js"
+  ],
+  "main": "./cross-events.js",
+  "scripts": {
+    "prebuild": "rm -rf dist",
+    "build": "echo 'skip'  ",
+    "start": "echo 'skip'  "
+  }
+}
